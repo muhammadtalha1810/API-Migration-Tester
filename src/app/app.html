@@ -1,0 +1,43 @@
+﻿<app-import-export-bar
+  (settingsClick)="onOpenSettings()"
+  (newSession)="onNewSession()"
+  (imported)="onImported($event)"
+/>
+
+@if (showSettings()) {
+  <app-settings-modal (close)="onCloseSettings()" />
+}
+
+<div class='main-content'>
+  @if (!sessionService.hasSession()) {
+    <app-config-form
+      (openSettings)="onOpenSettings()"
+      (generated)="onGenerated()"
+    />
+  } @else if (sessionService.status() === 'configured' || sessionService.status() === 'generating') {
+    <div class='generating-state'>
+      <div class='spinner'></div>
+      <p>Generating test cases with AI...</p>
+    </div>
+  } @else if (sessionService.status() === 'executing' || sessionService.status() === 'analyzing') {
+    <app-test-progress
+      #progressView
+      [concurrency]="10"
+      (complete)="onComplete()"
+      (testCaseSelected)="onTestCaseSelected($event)"
+    />
+  } @else if (sessionService.status() === 'complete') {
+    <app-results-dashboard
+      (newSession)="onNewSession()"
+      (rerun)="onRerun()"
+      (testCaseSelected)="onTestCaseSelected($event)"
+    />
+  }
+</div>
+
+@if (selectedTestCase()) {
+  <app-test-case-detail
+    [testCase]="selectedTestCase()"
+    (close)="onCloseDetail()"
+  />
+}

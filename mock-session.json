@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "test-session-001",
+  "createdAt": "2026-08-03T18:00:00.000Z",
+  "updatedAt": "2026-08-03T18:00:00.000Z",
+  "status": "complete",
+  "progressPointer": 0,
+  "config": {
+    "legacyApi": {
+      "url": "https://localhost:5001/api/test",
+      "bearerToken": "",
+      "payload": "{\"name\": \"test\"}",
+      "headers": []
+    },
+    "migratedApi": {
+      "url": "https://localhost:7001/api/test",
+      "bearerToken": "",
+      "payload": "{\"name\": \"test\"}",
+      "headers": []
+    },
+    "rules": "Field name max 50 chars",
+    "aiSettings": {
+      "provider": "openai",
+      "model": "gpt-4o",
+      "apiKey": "sk-test"
+    }
+  },
+  "testCases": [
+    {
+      "id": "tc-1",
+      "payload": "{\"name\": \"test\"}",
+      "description": "Normal payload",
+      "status": "done",
+      "legacyResponse": {
+        "statusCode": 200,
+        "body": "{\"name\": \"test\"}",
+        "headers": {},
+        "responseTime": 45
+      },
+      "migratedResponse": {
+        "statusCode": 200,
+        "body": "{\"name\": \"test\"}",
+        "headers": {},
+        "responseTime": 32
+      },
+      "responsesDiffer": false,
+      "bugReport": null
+    },
+    {
+      "id": "tc-2",
+      "payload": "{\"name\": \"\"}",
+      "description": "Empty name field",
+      "status": "done",
+      "legacyResponse": {
+        "statusCode": 200,
+        "body": "{\"error\": \"Name required\"}",
+        "headers": {},
+        "responseTime": 38
+      },
+      "migratedResponse": {
+        "statusCode": 400,
+        "body": "{\"error\": \"Bad Request\"}",
+        "headers": {},
+        "responseTime": 25
+      },
+      "responsesDiffer": true,
+      "bugReport": {
+        "testCaseId": "tc-2",
+        "title": "Status code mismatch on empty name",
+        "description": "Legacy API returns 200 with error body, migrated returns 400",
+        "workflow": "Send empty name field, compare status codes",
+        "causes": "Migrated API has stricter validation",
+        "helpfulInfo": "Check model validation in .NET Core"
+      }
+    },
+    {
+      "id": "tc-3",
+      "payload": "{\"name\": \"longstring\"}",
+      "description": "Name exceeding max length",
+      "status": "done",
+      "legacyResponse": {
+        "statusCode": 200,
+        "body": "{\"name\": \"longstring\"}",
+        "headers": {},
+        "responseTime": 50
+      },
+      "migratedResponse": {
+        "statusCode": 200,
+        "body": "{\"name\": \"longstring\"}",
+        "headers": {},
+        "responseTime": 30
+      },
+      "responsesDiffer": false,
+      "bugReport": null
+    }
+  ],
+  "bugs": [
+    {
+      "testCaseId": "tc-2",
+      "title": "Status code mismatch on empty name",
+      "description": "Legacy API returns 200 with error body, migrated returns 400",
+      "workflow": "Send empty name field, compare status codes",
+      "causes": "Migrated API has stricter validation",
+      "helpfulInfo": "Check model validation in .NET Core"
+    }
+  ]
+}
